@@ -1,0 +1,5 @@
+transformers
+flask
+sumy
+bs4
+nltk

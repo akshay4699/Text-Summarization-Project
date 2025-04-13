@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Text Summarization</title>
+</head>
+<body>
+    <h2>Text Summarization</h2>
+    <form method="post">
+        <textarea name="article" rows="10" cols="80" placeholder="Paste your article here..."></textarea><br>
+        <label>Summary Type:</label>
+        <select name="summary_type">
+            <option>Extractive</option>
+            <option>Abstractive</option>
+        </select>
+        <br><br>
+        <input type="submit" value="Summarize">
+    </form>
+    {% if summary %}
+        <h3>Summary:</h3>
+        <p>{{ summary }}</p>
+    {% endif %}
+</body>
+</html>
