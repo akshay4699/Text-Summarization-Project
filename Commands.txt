@@ -1,11 +1,13 @@
-## Run Locally
-```bash
-conda create -p venv  
-conda activate "D:\Akshay PerDocs\Projects\Text Summerizer\venv"
+conda create -p venv python==3.10 -y
+
+conda activate venv/
+
 pip install -r requirements.txt
+
 python main.py
+
 python app/flask_app.py
-```
+
 git init
 
 git commit -m "Final Summerizer 1"
