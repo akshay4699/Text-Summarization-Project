@@ -1,0 +1,172 @@
+Text Summarization Project
+
+This project provides both extractive and abstractive summaries of articles using Python-based Natural Language Processing (NLP) libraries. It also includes a web interface built using Flask for easy interaction and summarization.
+Features
+
+    Extractive Summarization: Summarizes content by selecting important sentences directly from the text.
+
+    Abstractive Summarization: Generates new sentences by interpreting and rewriting the main points from the text.
+
+    Preprocessing: The text is cleaned to remove unwanted characters and HTML tags before processing.
+
+    Dynamic Summary Length: The maximum length of summaries dynamically adjusts based on the length of the input.
+
+    File Saving: Summaries are saved as .txt files on the disk.
+
+    Flask Web Interface: Provides a web interface for users to paste articles and choose summary types.
+
+Technologies Used
+
+    Python: Core language used for development.
+
+    Hugging Face's Transformers: Used for the BART model (abstractive summarization).
+
+    Sumy: Used for LSA (Latent Semantic Analysis) based extractive summarization.
+
+    Flask: A lightweight Python web framework for building the user interface.
+
+    BeautifulSoup: For cleaning HTML tags from input text.
+
+    NLTK: Used for text tokenization.
+
+Algorithms and Techniques
+1. Extractive Summarization (Sumy - LSA)
+
+Extractive summarization works by selecting a subset of sentences from the input text. It ranks sentences based on importance using algorithms like Latent Semantic Analysis (LSA).
+
+    LSA Summarization: The sumy library’s LSA summarizer is used. It processes the text and selects the most relevant sentences to generate a summary. The number of sentences selected is based on a percentage of the input length (5% of the total word count).
+
+Steps in Extractive Summarization:
+
+    Tokenize the input text into sentences.
+
+    Create a document representation (TF-IDF matrix).
+
+    Apply Latent Semantic Analysis (LSA) to extract the most relevant sentences.
+
+    Return the top sentences to generate the summary.
+
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer
+
+def extractive_summary(text, num_sentences=3):
+    input_length = len(text.split())
+    num_sentences = max(1, int(input_length * 0.05))  # Approx 5% of total length
+    parser = PlaintextParser.from_string(text, Tokenizer("english"))
+    summarizer = LsaSummarizer()
+    summary = summarizer(parser.document, num_sentences)
+    return " ".join(str(sentence) for sentence in summary)
+
+2. Abstractive Summarization (BART model - Hugging Face)
+
+Abstractive summarization uses deep learning models to generate a concise version of the text. The BART (Bidirectional and Auto-Regressive Transformers) model is used here from Hugging Face's transformers library.
+
+    BART Model: This model has been pre-trained on a large corpus of data and can generate summaries by interpreting and rewriting the content of the text, similar to how humans summarize text.
+
+Steps in Abstractive Summarization:
+
+    Tokenize the input text into smaller chunks.
+
+    Pass the text through a pre-trained BART model.
+
+    Adjust the summary length based on input size to ensure readability.
+
+    Generate a summary using beam search and return the result.
+
+from transformers import pipeline
+
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+def abstractive_summary(text, min_len=10):
+    input_length = len(text.split())
+    max_len = max(int(input_length * 0.5), min_len + 10)
+    max_len = min(max_len, 120)  # Cap max length to avoid long generation
+    summary = summarizer(text, max_length=max_len, min_length=min_len, do_sample=False)
+    return summary[0]['summary_text']
+
+3. Text Preprocessing (Cleaning Text)
+
+Before text summarization, input data is cleaned by:
+
+    Removing HTML tags using BeautifulSoup.
+
+    Removing non-alphanumeric characters and unnecessary whitespaces using regular expressions.
+
+import re
+from bs4 import BeautifulSoup
+
+def clean_text(text):
+    # Remove HTML
+    text = BeautifulSoup(text, "html.parser").get_text()
+    # Remove unwanted characters
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"[^\w\s\.\,]", "", text)
+    return text.strip()
+
+4. Dynamic Summary Length
+
+The max_length parameter for abstractive summarization adjusts dynamically based on the input length. If the input is short, the output summary will be smaller; for longer inputs, the summary will be longer, but it will never exceed a set max_length to prevent excessively long outputs.
+
+max_len = max(int(input_length * 0.5), min_len + 10)
+max_len = min(max_len, 120)  # Cap max length to avoid long generation
+
+Flask Web Interface
+
+The project also provides a Flask web interface where users can paste their article, choose a summary type (extractive or abstractive), and get the summarized text. The summaries are displayed on the page, and the user can choose to download them.
+
+Here is the structure of the web form:
+
+<form method="post">
+    <textarea name="article" rows="10" cols="80" placeholder="Paste your article here..."></textarea><br>
+    <label>Summary Type:</label>
+    <select name="summary_type">
+        <option>Extractive</option>
+        <option>Abstractive</option>
+    </select>
+    <br><br>
+    <input type="submit" value="Summarize">
+</form>
+
+Once submitted, the app generates a summary based on the selected method and displays it on the page.
+Project Structure
+
+Text-Summarization-Project/
+│
+├── data/
+│   └── article1.txt            # Sample article text
+├── app/
+│   ├── flask_app.py            # Flask web app
+│   └── templates/
+│       └── index.html          # HTML interface
+├── models/
+│   ├── extractive_summarizer.py # Extractive summarization logic (Sumy)
+│   └── abstractive_summarizer.py # Abstractive summarization logic (BART)
+├── utils/
+│   └── preprocessing.py        # Text preprocessing functions
+├── requirements.txt            # Required Python packages
+├── main.py                     # Main script to run the summarizer
+└── README.md                   # Project description and setup
+
+How to Run Locally
+1. Clone the repository:
+
+git clone https://github.com/akshay4699/Text-Summarization-Project.git
+cd Text-Summarization-Project
+
+2. Install the required libraries:
+
+pip install -r requirements.txt
+
+3. Run the main summarization script:
+
+python main.py
+
+4. Run the Flask Web App:
+
+python app/flask_app.py
+
+You can access the web interface by opening your browser and navigating to http://127.0.0.1:5000/.
+License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
